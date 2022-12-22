@@ -1,3 +1,4 @@
+
 from api import IdenaAPI
 # Connect to local node with default settings (with no Custom api)
 api = IdenaAPI()
@@ -20,7 +21,8 @@ def get_info():
         "Node Version": nodever
     }
     return stats
-                
+get_info()                
+
 def search_tx(txhash):
     tx = api.transaction(txhash)["result"]
     return tx
@@ -34,12 +36,9 @@ def faucet_send(to):
     return result["result"]
 
 
-# an object of WSGI application
 from flask import Flask, redirect, request
 app = Flask(__name__)   # Flask constructor
   
-# A decorator used to tell the application
-# which URL is associated function
 
 @app.route('/addr/<addr>')
 def addr(addr):
@@ -124,9 +123,14 @@ def index():
     # center the page but make every element one under the other
     css = "<style>body {display: flex;justify-content: center;align-items: center;flex-direction: column;}</style>"
 
-    html = "Falcon Idena Light Explorer"
+    html = "Falcon Idena Light Explorer <a href='https://github.com/Idena-Falcon/idena-light-explorer'>Github</a>"
     html += css
-    # search with dropdown to select type
+    html += "<table>"
+
+    html += "<tr><td>Node</td><td>https://node.falcon.toni.software</td></tr>"
+    html += "<tr><td>API Key</td><td>123</td></tr>"
+    html += "</table>"    
+# search with dropdown to select type
     html += "<form action='/search' method='get'>"
     html += "<select name='type'>"
     html += "<option value='addr'>Address</option>"
@@ -153,7 +157,7 @@ def index():
     html += "</form>"
     # load last 50 blocks and check for txs
     txs = []
-    for i in range(stats["Block"] - 50, stats["Block"]):
+    for i in range(stats["Block"] - 25, stats["Block"]):
         block = api.block_at(i)["result"]
         try:
             # transactions check if its none
@@ -162,7 +166,7 @@ def index():
         except:
             pass
     html += "<table>"
-    html += "<tr><td>Lastest Transactions</td></tr>"
+    html += "<tr><td>Lastest Transactions (Last 25 blocks)</td></tr>"
     for tx in txs:
         tx = search_tx(tx)
         for key, value in tx.items():
@@ -208,8 +212,8 @@ def search():
 
 import time
 import json
-# json db
-# check ip if the last faucet request was less than 24 hours ago
+
+
 def add_ip(ip):
     with open("db.json", "r") as f:
         db = json.load(f)
